@@ -1,38 +1,30 @@
 import { canAccessAdminPanel } from './authorization';
 
-export type AuditEvent = {
+export type DeniedAccessInput = {
   actorId: string;
   role: string;
-  action: 'ADMIN_PANEL_ACCESS_DENIED';
   path: string;
   ipAddress?: string;
   userAgent?: string;
-  createdAt: string;
 };
 
-export async function recordAdminPanelAccessDenied(event: Omit<AuditEvent, 'action' | 'createdAt'>): Promise<AuditEvent> {
-  const auditEvent: AuditEvent = {
-    ...event,
-    action: 'ADMIN_PANEL_ACCESS_DENIED',
+export async function recordAdminPanelAccessDenied(input: DeniedAccessInput) {
+  const event = {
+    ...input,
+    action: 'ADMIN_PANEL_ACCESS_DENIED' as const,
     createdAt: new Date().toISOString(),
   };
 
-  // Replace this adapter with the PostgreSQL audit_logs repository in production.
-  console.warn('[audit]', JSON.stringify(auditEvent));
-  return auditEvent;
+  // Production adapter: insert event into PostgreSQL audit_logs.
+  console.warn('[audit]', JSON.stringify(event));
+  return event;
 }
 
-export async function requireOwnerAdminPanelAccess(input: {
-  actorId: string;
-  role: string;
-  path: string;
-  ipAddress?: string;
-  userAgent?: string;
-}): Promise<void> {
+export async function requireOwnerAdminPanelAccess(input: DeniedAccessInput) {
   if (canAccessAdminPanel(input.role)) return;
 
   await recordAdminPanelAccessDenied(input);
-  const error = new Error('Access Denied');
-  Object.assign(error, { statusCode: 403 });
+  const error = new Error('Access Denied') as Error & { statusCode: number };
+  error.statusCode = 403;
   throw error;
 }

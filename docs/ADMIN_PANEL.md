@@ -1,26 +1,24 @@
 # Admin Panel v3.2.0
 
-## Visibility
+## Rules
 
-The Profile tab renders the Admin Panel entry only when the verified session role is `SUPER_ADMIN` or `OWNER`. For `ADMIN`, `MODERATOR`, `SUPPORT`, `FINANCE_ADMIN`, `LEGAL_ADMIN`, and `USER`, the entry is not rendered at all.
+Only verified `SUPER_ADMIN` and `OWNER` roles may see or access Admin Panel. The Profile menu item is omitted completely for every other role.
 
-## Security
-
-UI hiding is only a usability rule. Every server route must enforce the same allowlist using a verified JWT/session claim. Do not trust role values from the browser, query string, local storage, or ordinary request body fields.
-
-A non-owner direct request returns HTTP `403` with `Access Denied` and creates an `ADMIN_PANEL_ACCESS_DENIED` audit event containing actor, role, path, timestamp, IP (where available), and user agent.
+Every direct page/API request is checked again on the server. A non-owner receives HTTP `403 Access Denied`, and an `ADMIN_PANEL_ACCESS_DENIED` event is recorded with actor, role, path, timestamp, IP where available, and user agent.
 
 ## Owner-only sections
 
-- Team and role management
-- Owner system edit, delete, and transfer
+- Team / role management
+- Owner edit, delete, and ownership transfer
 - Permission matrix
 - Full audit log
 - Billing / EMI overview
 - System settings
 
-## Integration notes
+## Production integration checklist
 
-- Replace the example server-session placeholders with the project's verified Firebase/JWT session adapter.
-- Replace `console.warn` with a parameterized insert into `audit_logs`.
-- Do not expose service-account credentials in the client or repository.
+1. Implement `getVerifiedSession()` using Firebase Auth or a verified JWT/session cookie.
+2. Attach the verified user to `req.user` in the backend auth middleware.
+3. Replace the example audit writer with a parameterized PostgreSQL insert.
+4. Do not trust role data from localStorage, URL parameters, client headers, or request bodies.
+5. Run the authorization unit tests and API integration tests before deployment.

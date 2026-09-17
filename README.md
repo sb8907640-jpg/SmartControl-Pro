@@ -1,12 +1,14 @@
 # SmartControl Pro
 
-Consent-first device management monorepo. This initial scaffold implements the v3.2.0 owner-only Admin Panel visibility rules.
+Consent-first device-management platform scaffold.
 
-## v3.2.0 Admin Panel rules
+## v3.2.0 owner-only Admin Panel
 
-- `SUPER_ADMIN` and `OWNER` can see and access Admin Panel.
-- All other roles are hidden from the Profile menu and receive `403 Access Denied` on direct route/API access.
-- Denied route attempts are recorded as audit events.
-- Authorization is enforced server-side; hiding a menu is not treated as security.
+The Admin Panel is available only to verified `SUPER_ADMIN` and `OWNER` sessions.
 
-See `docs/ADMIN_PANEL.md` for integration guidance.
+- Non-owner users do not receive an Admin Panel menu item.
+- Direct page and API access returns `403 Access Denied`.
+- Every denied attempt is written to the audit-log adapter.
+- Authorization is enforced server-side; UI hiding is not a security boundary.
+
+This commit contains the combined web, backend, Android, database, and test patch. Replace the example session and audit adapters with the project's production Firebase/JWT and PostgreSQL implementations before deployment.

@@ -1,26 +1,23 @@
 import { NextResponse } from 'next/server';
 import { requireOwnerAdminPanelAccess } from '@/lib/admin-panel-access';
 
-export async function GET(request: Request) {
-  // In production, actor identity and role come from the verified session/JWT.
-  const actorId = request.headers.get('x-authenticated-user-id');
-  const role = request.headers.get('x-authenticated-role');
+async function getVerifiedSession(request: Request): Promise<{ userId: string; role: string } | null> {
+  // Verify the signed session/JWT here. Do not read role from client headers.
+  void request;
+  return null;
+}
 
-  if (!actorId || !role) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+export async function GET(request: Request) {
+  const session = await getVerifiedSession(request);
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   try {
     await requireOwnerAdminPanelAccess({
-      actorId,
-      role,
+      actorId: session.userId,
+      role: session.role,
       path: new URL(request.url).pathname,
       ipAddress: request.headers.get('x-forwarded-for') ?? undefined,
       userAgent: request.headers.get('user-agent') ?? undefined,
-    });
-
-    return NextResponse.json({
-      sections: ['team-roles', 'permission-matrix', 'audit-log', 'billing-emi', 'system-settings'],
     });
   } catch (error) {
     if (error instanceof Error && 'statusCode' in error && error.statusCode === 403) {
@@ -28,4 +25,8 @@ export async function GET(request: Request) {
     }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
+
+  return NextResponse.json({
+    sections: ['team-roles', 'permission-matrix', 'audit-log', 'billing-emi', 'system-settings'],
+  });
 }

@@ -1,22 +1,14 @@
-import type { NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-/**
- * Defense-in-depth route guard. The API must repeat this authorization check;
- * middleware must never be the only security boundary.
- */
 export function middleware(request: NextRequest) {
   if (!request.nextUrl.pathname.startsWith('/admin-panel')) {
     return NextResponse.next();
   }
 
-  // The authenticated role should be set by the trusted auth/session layer.
-  // Never trust a client-controlled query parameter or localStorage value.
-  const role = request.headers.get('x-authenticated-role');
-  if (role !== 'SUPER_ADMIN' && role !== 'OWNER') {
-    return NextResponse.redirect(new URL('/access-denied?resource=admin-panel', request.url));
-  }
-
+  // This is only defense in depth. The authoritative role check must use the
+  // verified server session in the page and API route; never trust a client
+  // header, query parameter, localStorage value, or request body for identity.
   return NextResponse.next();
 }
 
