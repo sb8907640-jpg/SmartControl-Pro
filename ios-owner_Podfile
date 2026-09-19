@@ -1,0 +1,13 @@
+platform :ios, '15.0'
+
+target 'SmartControlOwner' do
+  use_frameworks!
+
+  pod 'Alamofire', '~> 5.8'
+  pod 'Socket.IO-Client-Swift', '~> 16.1.0'
+  pod 'Firebase/Messaging', '~> 10.20.0'
+  pod 'Firebase/Analytics', '~> 10.20.0'
+  pod 'KeychainAccess', '~> 4.2.2'
+  pod 'Kingfisher', '~> 7.10.0'
+  pod 'QRCode', '~> 5.0.0'
+end

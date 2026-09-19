@@ -1,0 +1,11 @@
+git init
+git add .
+git commit -m "Initial commit: SmartControl Pro v6.0.0
+
+- Consent-based device management
+- Backend API (Node.js + Express)
+- Android Receiver Lite (Kotlin + Compose)
+- Database schema (PostgreSQL)
+- Legal documentation
+- GitHub Actions workflows
+- All features require explicit consent"
